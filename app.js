@@ -35,26 +35,37 @@ client.on('message', async (msg) => {
                 voiceChannel = msg.member.voiceChannel
                 if (args[0]) {
                     chatChannel = client.channels.find(channel => channel.name === args[0]);
+                    if (voiceChannel && chatChannel) {
+                        var voiceChannelConnection = await voiceChannel.join();
+                        msg.reply(`Ready to transmit in ${chatChannel.name}!`);
+                        voiceChannelConnection.on('speaking', (user, speaking) => {
+                            if (speaking) {
+                                console.log(`I'm listening to ${user.username}`)
+                            }
+                            else {
+                                console.log(`I stopped listening to ${user.username}`)
+                            }
+                        })
+                    }
+                    else {
+                        msg.reply('Could not use the voice channel or chat channel!');
+                    }
                 }
-                if (voiceChannel && chatChannel) {
-                    var voiceChannelConnection = await voiceChannel.join();
-                    chatChannel.send('Ready to transmit!');
-                    voiceChannelConnection.on('speaking', (user, speaking) => {
-                        if (speaking) {
-                            console.log(`I'm listening to ${user.username}`)
-                        }
-                        else {
-                            console.log(`I stopped listening to ${user.username}`)
-                        }
-                    })
+                else {
+                    msg.reply('Please specify a channel!');
                 }
+            }
+            else {
+                msg.reply('Voice channel was already specified, please deactivate!');
             }
         }
         else if (command === 'deactivate') { // Deactivate recording command
+            chatChannel = null;
             if (voiceChannel) {
+                msg.reply('No longer ready to transmit!');
                 voiceChannel.leave();
-                voiceChannel = null;
             }
+            voiceChannel = null;
         }
     }
 });
