@@ -1,0 +1,32 @@
+{
+  "name": "echo-bot-discord",
+  "version": "1.0.0",
+  "main": "SpeechToText.js",
+  "scripts": {
+    "test": "test",
+    "test2": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshuakristanto/EchosTeam4.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshuakristanto/EchosTeam4/issues"
+  },
+  "homepage": "https://github.com/joshuakristanto/EchosTeam4#readme",
+  "dependencies": {
+    "@google-cloud/speech": "^3.5.4",
+    "@google-cloud/storage": "^4.3.0",
+    "chalk": "^3.0.0",
+    "discord.js": "^11.5.1",
+    "encoding": "^0.1.12",
+    "node-record-lpcm16": "^1.0.1",
+    "package.json": "^2.0.1",
+    "sox": "^0.1.0",
+    "yargs": "^15.1.0"
+  },
+  "devDependencies": {},
+  "description": ""
+}
