@@ -1,0 +1,22 @@
+{
+  "name": "echo-bot-discord",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshuakristanto/EchosTeam4.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshuakristanto/EchosTeam4/issues"
+  },
+  "homepage": "https://github.com/joshuakristanto/EchosTeam4#readme",
+  "dependencies": {
+    "discord.js": "^11.5.1"
+  }
+}
