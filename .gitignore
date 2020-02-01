@@ -109,3 +109,6 @@ dist
 # User-Defined
 config.json
 output/
+
+
+/node_modules

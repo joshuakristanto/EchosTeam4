@@ -22,6 +22,7 @@ function createWindow () {
   mainWindow.setAlwaysOnTop(true, "floating");
 mainWindow.setVisibleOnAllWorkspaces(true);
 mainWindow.setFullScreenable(false);
+// mainWindow.setIgnoreMouseEvents(true);
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')
 
