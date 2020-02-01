@@ -17,11 +17,12 @@ var voiceChannel = null;
 var radios = new Map();
 
 async function startRecording(member, radio) {
+    console.log('Activated with no errors so far!');
     const connection = radio.connection;
     const receiver = connection.receiver;
     connection.on('speaking', (user, speaking) => {
         if (speaking) {
-            console.log('1');
+            console.log('User ' + user.tag + ' speaking!');
         }
     })
     const voiceStream = receiver.createStream(member, { mode: 'opus', end: 'manual' });
@@ -33,13 +34,8 @@ async function startRecording(member, radio) {
         writeStream
     });
     voiceStream.on('close', () => {
-        console.log('end of recording voice!');
         radio.members.delete(member.id);
-        writeStream.end(err => {
-            if (err) {
-                console.log(err);
-            }
-        });
+        writeStream.end();
     });
 }
 
@@ -67,6 +63,7 @@ client.on('message', async (msg) => {
                         
         if (command === 'ping') { // Test command
             msg.reply('Pong!');
+            console.log('Was pinged!');
         }
         else if (command === 'activate') { // Activate recording command
             if (args[0]) {
@@ -90,7 +87,9 @@ client.on('message', async (msg) => {
                                     };
                                     radios.set(voiceChannel.channelID, radio);
                                     voiceChannel.members.forEach((member) => {
-                                        startRecording(member, radio);
+                                        if (member.user != client.user) {
+                                            startRecording(member, radio);
+                                        }
                                     });
                                 });
                             }
@@ -125,6 +124,7 @@ client.on('message', async (msg) => {
                 voiceChannel.leave();
             }
             voiceChannel = null;
+            console.log(`Deactivating!`);
         }
     }
 });
