@@ -6,13 +6,24 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <link rel="stylesheet" href="CSS/style.css">
-    <title>Hello World!</title>
+    <title>Echo Captioning!</title>
   </head>
   <body>
-    <h1>Hello World!</h1>
+    <h1>ECHO CAPTIONING!</h1>
     We are using Node.js <span id="node-version"></span>,
     Chromium <span id="chrome-version"></span>,
     and Electron <span id="electron-version"></span>.
+
+    <div id="messageViewPort">
+      <ul id="messages">
+        <li>This is a Test!!</li>
+        <li>This is a Test!!</li>
+        <li>This is a Test!!</li>
+        <li>This is a Test!!</li>
+        <li>This is a Test!!</li>
+        <li>This is a Test!!</li>
+      </ul>
+    </div>
 
     <!-- You can also require other files to run in this process -->
     <script src="./renderer.js"></script>

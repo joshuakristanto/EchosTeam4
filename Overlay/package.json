@@ -20,6 +20,7 @@
     "electron": "^7.1.11"
   },
   "dependencies": {
+    "electron-positioner": "^4.1.0",
     "package.json": "^2.0.1"
   }
 }

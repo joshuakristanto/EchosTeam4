@@ -9,20 +9,22 @@ let mainWindow
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    transparent: true,
-    frame: true,
+    width: 400,
+    height: 800,
+    // transparent: true,
+    frame: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     }
     
   })
 
+  // positioner.move('topRight');
+  mainWindow.setPosition(1030,-800,false);
   mainWindow.setAlwaysOnTop(true, "floating");
 mainWindow.setVisibleOnAllWorkspaces(true);
 mainWindow.setFullScreenable(false);
-// mainWindow.setIgnoreMouseEvents(true);
+mainWindow.setIgnoreMouseEvents(true);
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')
 
