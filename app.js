@@ -12,17 +12,17 @@ var chatChannel = null;
 var voiceChannel = null;
 
 function generateOutputFile(channel, member) {
-    const fileName = './recordings/${channel.id}-${member.id}-${Date.now()}.pcm';
+    const fileName = `./recordings/${channel.id}-${member.id}-${Date.now()}.pcm`;
     return fs.createWriteStream(fileName);
-  }
+}
 
 // Ready event
 client.on('ready', () => {
-    console.log('Logged in as ${client.user.tag}!');
+    console.log(`Logged in as ${client.user.tag}!`);
 });
 
 // Message event
-client.on('message', msg => {
+client.on('message', async (msg) => {
     if (msg.content.startsWith(prefix) && !msg.author.bot) {
         const args = msg.content.slice(prefix.length).split(' '); // Arguments of a message
         const command = args.shift().toLowerCase(); // Command
@@ -31,36 +31,23 @@ client.on('message', msg => {
             msg.reply('Pong!');
         }
         else if (command === 'activate') { // Activate recording command
-            voiceChannel = msg.member.voiceChannel
-            if (args[0]) {
-                chatChannel = client.channels.find('name', args[0]);
-            }
-            if (chatChannel) {
-                chatChannel.send('test');
-            }
-            if (voiceChannel) {
-                voiceChannel.join().then(conn => {
-                    msg.reply('ready!');
-                    // create our voice receiver
-                    const receiver = conn.createReceiver();
-            
-                    conn.on('speaking', (user, speaking) => {
-                      if (speaking) {
-                        msg.channel.sendmsg('I\'m listening to ${user}');
-                        // this creates a 16-bit signed PCM, stereo 48KHz PCM stream.
-                        const audioStream = receiver.createPCMStream(user);
-                        // create an output stream so we can dump our data in a file
-                        const outputStream = generateOutputFile(voiceChannel, user);
-                        // pipe our audio data into the file stream
-                        audioStream.pipe(outputStream);
-                        outputStream.on("data", console.log);
-                        // when the stream ends (the user stopped talking) tell the user
-                        audioStream.on('end', () => {
-                          msg.channel.sendmsg('I\'m no longer listening to ${user}');
-                        });
-                      }
-                    });
-                  })
+            if (!voiceChannel) {
+                voiceChannel = msg.member.voiceChannel
+                if (args[0]) {
+                    chatChannel = client.channels.find(channel => channel.name === args[0]);
+                }
+                if (voiceChannel && chatChannel) {
+                    var voiceChannelConnection = await voiceChannel.join();
+                    chatChannel.send('Ready to transmit!');
+                    voiceChannelConnection.on('speaking', (user, speaking) => {
+                        if (speaking) {
+                            console.log(`I'm listening to ${user.username}`)
+                        }
+                        else {
+                            console.log(`I stopped listening to ${user.username}`)
+                        }
+                    })
+                }
             }
         }
         else if (command === 'deactivate') { // Deactivate recording command
