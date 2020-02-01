@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/joshuakristanto/EchosTeam4#readme",
   "dependencies": {
-    "discord.js": "^11.5.1"
+    "discord.js": "^11.5.1",
+    "fs-extra": "^8.1.0",
+    "node-opus": "^0.3.1"
   }
 }
