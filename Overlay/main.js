@@ -10,8 +10,8 @@ function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 400,
-    height: 800,
-    // transparent: true,
+    height: 400,
+    transparent: true,
     frame: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
@@ -60,3 +60,4 @@ app.on('activate', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+

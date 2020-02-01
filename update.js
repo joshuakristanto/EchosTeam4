@@ -1,0 +1,1 @@
+const wpm = document.querySelector(".messages");
