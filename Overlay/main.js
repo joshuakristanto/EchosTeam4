@@ -26,7 +26,7 @@ function createWindow () {
 mainWindow.setVisibleOnAllWorkspaces(true);
 app.dock.hide();
 mainWindow.setFullScreenable(false);
-mainWindow.setVisibleOnAllWorkspaces(true)
+mainWindow.setVisibleOnAllWorkspaces(true);
 // mainWindow.setIgnoreMouseEvents(true);
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')
