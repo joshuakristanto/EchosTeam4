@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "SpeechToText.js",
   "scripts": {
+    "start": "node app.js"
     "test": "test",
     "test2": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,11 +18,13 @@
   },
   "homepage": "https://github.com/joshuakristanto/EchosTeam4#readme",
   "dependencies": {
+    "@discordjs/opus": "^0.1.0",
     "@google-cloud/speech": "^3.5.4",
     "@google-cloud/storage": "^4.3.0",
     "chalk": "^3.0.0",
-    "discord.js": "^11.5.1",
+    "discord.js": "12.0.0-dev",
     "encoding": "^0.1.12",
+    "fs-extra": "^8.1.0",
     "node-record-lpcm16": "^1.0.1",
     "package.json": "^2.0.1",
     "sox": "^0.1.0",

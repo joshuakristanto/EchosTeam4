@@ -1,19 +1,49 @@
 const Discord = require('discord.js');
-const fs = require('fs');
-
+const fs = require('fs-extra');
+const path = require('path');
 // Configuration file that must be in JSON format
 const { prefix, token } = require('./config.json');
+
 // Client
 const client = new Discord.Client();
+// Output Path
+const outputPath = path.join(__dirname, 'output');
 
 // Chat channel cache
 var chatChannel = null;
 // Voice channel cache
 var voiceChannel = null;
 
-function generateOutputFile(channel, member) {
-    const fileName = `./recordings/${channel.id}-${member.id}-${Date.now()}.pcm`;
-    return fs.createWriteStream(fileName);
+var writeStream = null;
+
+var radios = new Map();
+
+function startRecording(member, radio) {
+    const connection = radio.connection;
+    const receiver = connection.receiver;
+
+    /*const voiceStream = receiver.createStream(member, { mode: 'opus', end: 'manual' });
+    const output = path.join(radio.output, `${member.id}-${Date.now()}.raw_opus`);
+    const writeStream = fs.createWriteStream(output);
+    voiceStream.pipe(writeStream);
+    radio.members.set(member.id, {
+        voiceStream,
+        writeStream
+    });
+    voiceStream.on('close', () => {
+        radio.members.delete(member.id);
+        writeStream.end();
+    });*/
+}
+
+function stopRecording(member, radio) {
+    /*const memberData = radio.members.get(member.id);
+    if (memberData) {
+        const { voiceStream, writeStream } = memberData;
+        voiceStream.destroy();
+        writeStream.end();
+    }
+    radio.members.delete(member.id);*/
 }
 
 // Ready event
@@ -25,47 +55,78 @@ client.on('ready', () => {
 client.on('message', async (msg) => {
     if (msg.content.startsWith(prefix) && !msg.author.bot) {
         const args = msg.content.slice(prefix.length).split(' '); // Arguments of a message
-        const command = args.shift().toLowerCase(); // Command
-    
+        const command = args.shift().toLowerCase(); // First element of message
+        const member = msg.member; // Member who specified the message
+                        
         if (command === 'ping') { // Test command
             msg.reply('Pong!');
+            console.log('Was pinged!');
         }
         else if (command === 'activate') { // Activate recording command
-            if (!voiceChannel) {
-                voiceChannel = msg.member.voiceChannel
-                if (args[0]) {
-                    chatChannel = client.channels.find(channel => channel.name === args[0]);
-                    if (voiceChannel && chatChannel) {
-                        var voiceChannelConnection = await voiceChannel.join();
-                        msg.reply(`Ready to transmit in ${chatChannel.name}!`);
-                        voiceChannelConnection.on('speaking', (user, speaking) => {
-                            if (speaking) {
-                                console.log(`I'm listening to ${user.username}`)
+            if (args[0]) {
+                chatChannel = client.channels.find(channel => channel.name === args[0]);
+                if (chatChannel) {
+                    if (!voiceChannel) {
+                        const voice = member.voice;
+                        if (voice) {
+                            voiceChannel = voice.channel;
+                            if (voiceChannel) {
+                                const output = path.join(outputPath, `${voiceChannel.channelID}-${Date.now()}`);
+                                fs.ensureDir(output);
+                                const connection = await voiceChannel.join().then(async connection =>{
+                                    msg.reply(`Ready to transmit in ${chatChannel.name}!`);
+                                    console.log('Activated!');
+
+                                    connection.on('speaking', (user, speaking) => {
+                                        console.log('User ' + user.tag + ' is ' + speaking);
+                                    });
+
+                                    const radio = {
+                                        name: voiceChannel.name,
+                                        output,
+                                        connection,
+                                        members: new Map()
+                                    };
+                                    radios.set(voiceChannel.channelID, radio);
+                                    voiceChannel.members.forEach((member) => {
+                                        if (member.user.id != client.user.id) {
+                                            startRecording(member, radio);
+                                        }
+                                    });
+                                });
                             }
                             else {
-                                console.log(`I stopped listening to ${user.username}`)
+                                msg.reply('Could not use the voice channel!');
                             }
-                        })
+                        }
+                        else {
+                            msg.reply('Could not get the voice state!');
+                        }
                     }
                     else {
-                        msg.reply('Could not use the voice channel or chat channel!');
+                        msg.reply('Voice channel was already specified, please deactivate!');
                     }
                 }
                 else {
-                    msg.reply('Please specify a channel!');
+                    msg.reply('Could not use the chat channel!');
                 }
             }
             else {
-                msg.reply('Voice channel was already specified, please deactivate!');
+                msg.reply('Please specify a channel!');
             }
         }
         else if (command === 'deactivate') { // Deactivate recording command
             chatChannel = null;
             if (voiceChannel) {
                 msg.reply('No longer ready to transmit!');
+                const radio = radios.get(voiceChannel.channelID);
+                radio.members.forEach((member) => {
+                    stopRecording(member, radio);
+                });
                 voiceChannel.leave();
             }
             voiceChannel = null;
+            console.log(`Deactivating!`);
         }
     }
 });
