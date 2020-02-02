@@ -111,7 +111,7 @@ function startRecording(member, radio) {
                 io.emit('message', `${member.tag}: ${transcript}`);
                 radio.chatChannel.send(`${member.tag}: ${transcript}`);
         
-                isFinalEndTime = 0;
+                // let isFinalEndTime = 0;
             }
             else {
                 // Make sure transcript does not exceed console character length
