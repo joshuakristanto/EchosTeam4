@@ -76,21 +76,19 @@ client.on('message', async (msg) => {
                             if (voiceChannel) {
                                 const output = path.join(outputPath, `${voiceChannel.channelID}-${Date.now()}`);
                                 fs.ensureDir(output);
-                                voiceChannel.join().then(connection => {
-                                    msg.reply(`Ready to transmit in ${chatChannel.name}!`);
-            
-                                    const radio = {
-                                        name: voiceChannel.name,
-                                        output,
-                                        connection,
-                                        members: new Map()
-                                    };
-                                    radios.set(voiceChannel.channelID, radio);
-                                    voiceChannel.members.forEach((member) => {
-                                        if (member.user != client.user) {
-                                            startRecording(member, radio);
-                                        }
-                                    });
+                                const connection = await voiceChannel.join();
+                                msg.reply(`Ready to transmit in ${chatChannel.name}!`);
+                                const radio = {
+                                    name: voiceChannel.name,
+                                    output,
+                                    connection,
+                                    members: new Map()
+                                };
+                                radios.set(voiceChannel.channelID, radio);
+                                voiceChannel.members.forEach((member) => {
+                                    if (member.user.id != client.user.id) {
+                                        startRecording(member, radio);
+                                    }
                                 });
                             }
                             else {
