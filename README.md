@@ -1,4 +1,5 @@
 # EchosTeam4
+[![EchosTeam4](Echos.png)](https://github.com/joshuakristanto/EchosTeam4/)
 
 # Objective:
 Create a Bot that monitors a Voice Channel and utilizes
