@@ -15,6 +15,10 @@ Discord’s overlay as the surface to display captions on.
 * Jquery
 * Google Speech To Text
 
+# Requirements:
+* Google Cloud Account
+* Discord Account
+
 # How to use:
 1. Turn bot services on
 2. Join voice channel
@@ -22,7 +26,7 @@ Discord’s overlay as the surface to display captions on.
 4. Clients can use Electron
 5. Speak
 
-# How to configure:
+# How to Configure:
 You need a config.json with the following:
 ```
 {
