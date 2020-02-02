@@ -148,18 +148,23 @@ client.on('message', async (msg) => {
                                     console.log('Activated!');
                                     connection.play(new Silence(), { type: 'opus' });
                                     connection.on('speaking', (user, speaking) => {
-                                        if (user, speaking) {
-                                            console.log(user.tag + ' is speaking!');
-                                            const radio = {
-                                                name: voiceChannel.name,
-                                                output,
-                                                connection,
-                                                chatChannel,
-                                                members: new Map()
-                                            };
-                                            radios.set(voiceChannel.channelID, radio);
-                                            if (user.id != client.user.id) {
-                                                startRecording(user, radio);
+                                        if (user) {
+                                            if (speaking) {
+                                                console.log(user.tag + ' is speaking!');
+                                                const radio = {
+                                                    name: voiceChannel.name,
+                                                    output,
+                                                    connection,
+                                                    chatChannel,
+                                                    members: new Map()
+                                                };
+                                                radios.set(voiceChannel.channelID, radio);
+                                                if (user.id != client.user.id) {
+                                                    startRecording(user, radio);
+                                                }
+                                            }
+                                            else {
+                                                connection.play(new Silence(), { type: 'opus' });
                                             }
                                         }
                                     });
