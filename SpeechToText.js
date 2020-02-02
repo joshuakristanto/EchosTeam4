@@ -203,12 +203,12 @@ function infiniteStream(
     if (stream.results[0].isFinal) {
       process.stdout.write(chalk.green(`${stdoutText}\n`));
 
-        console.log("stdoutText");
+        //console.log("stdoutText");
         
         io.emit('message', " " + stdoutText);
-        console.log("stdoutText");
+        //console.log("stdoutText");
         
-        console.log("stdoutText");
+        //console.log("stdoutText");
       isFinalEndTime = resultEndTime;
       lastTranscriptWasFinal = true;
     } else {

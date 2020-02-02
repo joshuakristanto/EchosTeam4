@@ -1,4 +1,3 @@
-const window3 = document.querySelector("#messages");
 console.log("TEST");
 
 $(function () {
@@ -9,7 +8,13 @@ $(function () {
     socket.on('message', function (data) {
         $('#messages').append($('<li>').text(data));
         console.log(""+data);
-        window3.scrollTo(0, document.body.scrollHeight)
+        move();
     });
-
 });
+
+
+function move()
+{
+    $(document).scrollTop($(document).height()); 
+}
+
