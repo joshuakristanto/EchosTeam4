@@ -14,18 +14,15 @@ var chatChannel = null;
 // Voice channel cache
 var voiceChannel = null;
 
+var writeStream = null;
+
 var radios = new Map();
 
-async function startRecording(member, radio) {
-    console.log('Activated with no errors so far!');
+function startRecording(member, radio) {
     const connection = radio.connection;
     const receiver = connection.receiver;
-    connection.on('speaking', (user, speaking) => {
-        if (speaking) {
-            console.log('User ' + user.tag + ' speaking!');
-        }
-    })
-    const voiceStream = receiver.createStream(member, { mode: 'opus', end: 'manual' });
+
+    /*const voiceStream = receiver.createStream(member, { mode: 'opus', end: 'manual' });
     const output = path.join(radio.output, `${member.id}-${Date.now()}.raw_opus`);
     const writeStream = fs.createWriteStream(output);
     voiceStream.pipe(writeStream);
@@ -36,17 +33,17 @@ async function startRecording(member, radio) {
     voiceStream.on('close', () => {
         radio.members.delete(member.id);
         writeStream.end();
-    });
+    });*/
 }
 
-async function stopRecording(member, radio) {
-    const memberData = radio.members.get(member.id);
+function stopRecording(member, radio) {
+    /*const memberData = radio.members.get(member.id);
     if (memberData) {
         const { voiceStream, writeStream } = memberData;
         voiceStream.destroy();
         writeStream.end();
     }
-    radio.members.delete(member.id);
+    radio.members.delete(member.id);*/
 }
 
 // Ready event
@@ -76,19 +73,26 @@ client.on('message', async (msg) => {
                             if (voiceChannel) {
                                 const output = path.join(outputPath, `${voiceChannel.channelID}-${Date.now()}`);
                                 fs.ensureDir(output);
-                                const connection = await voiceChannel.join();
-                                msg.reply(`Ready to transmit in ${chatChannel.name}!`);
-                                const radio = {
-                                    name: voiceChannel.name,
-                                    output,
-                                    connection,
-                                    members: new Map()
-                                };
-                                radios.set(voiceChannel.channelID, radio);
-                                voiceChannel.members.forEach((member) => {
-                                    if (member.user.id != client.user.id) {
-                                        startRecording(member, radio);
-                                    }
+                                const connection = await voiceChannel.join().then(async connection =>{
+                                    msg.reply(`Ready to transmit in ${chatChannel.name}!`);
+                                    console.log('Activated!');
+
+                                    connection.on('speaking', (user, speaking) => {
+                                        console.log('User ' + user.tag + ' is ' + speaking);
+                                    });
+
+                                    const radio = {
+                                        name: voiceChannel.name,
+                                        output,
+                                        connection,
+                                        members: new Map()
+                                    };
+                                    radios.set(voiceChannel.channelID, radio);
+                                    voiceChannel.members.forEach((member) => {
+                                        if (member.user.id != client.user.id) {
+                                            startRecording(member, radio);
+                                        }
+                                    });
                                 });
                             }
                             else {
