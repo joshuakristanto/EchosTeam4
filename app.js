@@ -189,7 +189,15 @@ client.on('message', async (msg) => {
         const member = msg.member;
                         
         // Test command
-        if (command === 'ping') {
+        if (command === 'help') {
+            msg.reply(`\`\`\` ${prefix}ping : pings the bot which should pong back \`\`\``);
+            msg.reply(`\`\`\` ${prefix}activate <channel>: activates 
+                the bot in specified required channel \`\`\``);
+            msg.reply(`\`\`\` ${prefix}deactivate : deactivates the bot \`\`\``);
+            msg.reply(`\`\`\` Join a voice channel first, then activate the bot \`\`\``);
+            console.log('Was called for help!');
+        }
+        else if (command === 'ping') {
             msg.reply('Pong!');
             console.log('Was pinged!');
         }
