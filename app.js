@@ -8,8 +8,7 @@ const path = require('path');
 const { Readable, Transform } = require('stream');
 
 // Configuration file that must be in JSON format
-const { prefix, outputSocketHost,
-    outputSocketPort, token } = require('./config.json');
+const { prefix, outputSocketPort, token } = require('./config.json');
 
 // Client
 const client = new Discord.Client();
@@ -202,8 +201,8 @@ client.on('message', async (msg) => {
     }
 });
 
-http.listen(outputSocketPort, outputSocketHost, function () {
-    console.log(`Output listening on ${outputSocketHost}:${outputSocketPort}`);
+http.listen(outputSocketPort, function () {
+    console.log(`Output listening on *:${outputSocketPort}`);
 });
 
 client.login(token);
