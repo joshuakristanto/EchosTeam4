@@ -27,7 +27,7 @@ var chatChannel = null;
 var voiceChannel = null;
 // Radio cache
 var radios = new Map();
-let resultEndTime = 0;
+var resultEndTime = 0;
 
 class Silence extends Readable {
     _read() {

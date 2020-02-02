@@ -1,7 +1,7 @@
 console.log("TEST");
 
 $(function () {
-    var socket = io('http://localhost:7110', { path: '/socket.io' }); // connect to server
+    var socket = io('http://34.94.45.188:7110', { path: '/socket.io' }); // connect to server
 
     console.log("A USER CONNECTED");
 
