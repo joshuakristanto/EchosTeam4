@@ -88,7 +88,7 @@ function startRecording(member, radio) {
             }
         
             if (stream.results[0].isFinal) {
-                process.stdout.write(`${stdoutText}\n`);
+                // process.stdout.write(`${stdoutText}\n`);
                 let transcript = stream.results[0].alternatives[0].transcript;
                 //send data to socket client
                 console.log(`${member.tag}: ${transcript}`);
@@ -103,8 +103,6 @@ function startRecording(member, radio) {
                     stdoutText = stdoutText.substring(0, process.stdout.columns - 4) + '...';
                 }
                 // process.stdout.write(`${stdoutText}`);
-                
-                lastTranscriptWasFinal = false;
             }
         });
         /*.on('data', response => {
@@ -229,7 +227,7 @@ client.on('message', async (msg) => {
                 msg.reply('Please specify a channel!');
             }
         }
-        else if (command === 'deactivate') { // Deactivate recording command
+        /*else if (command === 'deactivate') { // Deactivate recording command
             chatChannel = null;
             if (voiceChannel) {
                 msg.reply('No longer ready to transmit!');
@@ -241,7 +239,7 @@ client.on('message', async (msg) => {
             }
             voiceChannel = null;
             console.log(`Deactivating!`);
-        }
+        }*/
     }
 });
 
