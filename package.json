@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "SpeechToText.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
     "test": "test",
     "test2": "echo \"Error: no test specified\" && exit 1"
   },
