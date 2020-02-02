@@ -1,29 +1,96 @@
 const Discord = require('discord.js');
+const express = require('express');
 const fs = require('fs-extra');
+const googleSpeech = require('@google-cloud/speech');
+const http = require('http').createServer(express);
+const io = require('socket.io')(http);
 const path = require('path');
+const { Readable, Transform } = require('stream');
+
 // Configuration file that must be in JSON format
-const { prefix, token } = require('./config.json');
+const { prefix, outputSocketHost,
+    outputSocketPort, token } = require('./config.json');
 
 // Client
 const client = new Discord.Client();
+// Google Speech Client for Speech to Text
+const googleSpeechClient = new googleSpeech.SpeechClient();
 // Output Path
 const outputPath = path.join(__dirname, 'output');
+// This is a hack that sent a silence frame so that we can keep the bot on
+const silenceFrame = Buffer.from([0xF8, 0xFF, 0xFE]);
 
 // Chat channel cache
 var chatChannel = null;
 // Voice channel cache
 var voiceChannel = null;
-
-var writeStream = null;
-
+// Radio cache
 var radios = new Map();
+
+class Silence extends Readable {
+    _read() {
+        this.push(silenceFrame);
+    }
+}
+
+class ConvertTo1ChannelStream extends Transform {
+    constructor(source, options) {
+      super(options)
+    }
+    _transform(data, encoding, next) {
+      next(null, convertBufferTo1Channel(data))
+    }
+  }
+
+function convertBufferTo1Channel(buffer) {
+    const convertedBuffer = Buffer.alloc(buffer.length / 2);
+  
+    for (let i = 0; i < convertedBuffer.length / 2; i++) {
+      const uint16 = buffer.readUInt16LE(i * 4);
+      convertedBuffer.writeUInt16LE(uint16, i * 2);
+    }
+  
+    return convertedBuffer;
+}
 
 function startRecording(member, radio) {
     const connection = radio.connection;
     const receiver = connection.receiver;
 
-    /*const voiceStream = receiver.createStream(member, { mode: 'opus', end: 'manual' });
-    const output = path.join(radio.output, `${member.id}-${Date.now()}.raw_opus`);
+    const voiceStream = receiver.createStream(member, { mode: 'pcm' });
+
+    const requestConfig = {
+        encoding: 'LINEAR16',
+        sampleRateHertz: 48000,
+        languageCode: 'en-US'
+    }
+    const request = {
+        config: requestConfig
+    }
+    const recognizeStream = googleSpeechClient
+        .streamingRecognize(request)
+        .on('error', console.error)
+        .on('data', response => {
+            const transcription = response.results
+                .map(result => result.alternatives[0].transcript)
+                .join('\n')
+                .toLowerCase()
+            console.log(`${member.tag}: ${transcription}`);
+            io.emit('message', `${member.tag}: ${transcription}`);
+            radio.chatChannel.send(`${member.tag}: ${transcription}`);
+    });
+
+    const convertTo1ChannelStream = new ConvertTo1ChannelStream();
+    voiceStream.pipe(convertTo1ChannelStream).pipe(recognizeStream);
+
+    radio.members.set(member.id, {
+        voiceStream
+    });
+    voiceStream.on('close', () => {
+        radio.members.delete(member.id);
+    }); 
+
+    /* const output = path.join(radio.output, `${member.id}-${Date.now()}.raw_voice`);
     const writeStream = fs.createWriteStream(output);
     voiceStream.pipe(writeStream);
     radio.members.set(member.id, {
@@ -33,21 +100,25 @@ function startRecording(member, radio) {
     voiceStream.on('close', () => {
         radio.members.delete(member.id);
         writeStream.end();
-    });*/
+    }); */
 }
 
 function stopRecording(member, radio) {
-    /*const memberData = radio.members.get(member.id);
+    const memberData = radio.members.get(member.id);
     if (memberData) {
+        const { voiceStream } = memberData;
+        voiceStream.destroy();
+    }
+    /* if (memberData) {
         const { voiceStream, writeStream } = memberData;
         voiceStream.destroy();
         writeStream.end();
-    }
-    radio.members.delete(member.id);*/
+    } */
+    radio.members.delete(member.id);
 }
 
 // Ready event
-client.on('ready', () => {
+client.on('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
@@ -76,21 +147,21 @@ client.on('message', async (msg) => {
                                 const connection = await voiceChannel.join().then(async connection =>{
                                     msg.reply(`Ready to transmit in ${chatChannel.name}!`);
                                     console.log('Activated!');
-
+                                    connection.play(new Silence(), { type: 'opus' });
                                     connection.on('speaking', (user, speaking) => {
-                                        console.log('User ' + user.tag + ' is ' + speaking);
-                                    });
-
-                                    const radio = {
-                                        name: voiceChannel.name,
-                                        output,
-                                        connection,
-                                        members: new Map()
-                                    };
-                                    radios.set(voiceChannel.channelID, radio);
-                                    voiceChannel.members.forEach((member) => {
-                                        if (member.user.id != client.user.id) {
-                                            startRecording(member, radio);
+                                        if (user, speaking) {
+                                            console.log(user.tag + ' is speaking!');
+                                            const radio = {
+                                                name: voiceChannel.name,
+                                                output,
+                                                connection,
+                                                chatChannel,
+                                                members: new Map()
+                                            };
+                                            radios.set(voiceChannel.channelID, radio);
+                                            if (user.id != client.user.id) {
+                                                startRecording(user, radio);
+                                            }
                                         }
                                     });
                                 });
@@ -129,6 +200,10 @@ client.on('message', async (msg) => {
             console.log(`Deactivating!`);
         }
     }
+});
+
+http.listen(outputSocketPort, outputSocketHost, function () {
+    console.log(`Output listening on ${outputSocketHost}:${outputSocketPort}`);
 });
 
 client.login(token);
