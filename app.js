@@ -18,13 +18,16 @@ const googleSpeechClient = new googleSpeech.SpeechClient();
 const outputPath = path.join(__dirname, 'output');
 // This is a hack that sent a silence frame so that we can keep the bot on
 const silenceFrame = Buffer.from([0xF8, 0xFF, 0xFE]);
+const streamingLimit = 290000;
 
+var bridgingOffset = 0;
 // Chat channel cache
 var chatChannel = null;
 // Voice channel cache
 var voiceChannel = null;
 // Radio cache
 var radios = new Map();
+let resultEndTime = 0;
 
 class Silence extends Readable {
     _read() {
@@ -39,7 +42,7 @@ class ConvertTo1ChannelStream extends Transform {
     _transform(data, encoding, next) {
       next(null, convertBufferTo1Channel(data))
     }
-  }
+}
 
 function convertBufferTo1Channel(buffer) {
     const convertedBuffer = Buffer.alloc(buffer.length / 2);
@@ -69,15 +72,51 @@ function startRecording(member, radio) {
     const recognizeStream = googleSpeechClient
         .streamingRecognize(request)
         .on('error', console.error)
-        .on('data', response => {
+        .on('data', (stream) => {
+            // Convert API result end time from seconds + nanoseconds to milliseconds
+            resultEndTime = stream.results[0].resultEndTime.seconds * 1000 +
+                Math.round(stream.results[0].resultEndTime.nanos / 1000000);
+        
+            // Calculate correct time based on offset from audio sent twice
+            const correctedTime = resultEndTime - bridgingOffset + streamingLimit;
+        
+            process.stdout.clearLine();
+            process.stdout.cursorTo(0);
+            let stdoutText = '';
+            if (stream.results[0] && stream.results[0].alternatives[0]) {
+                stdoutText = correctedTime + ': ' + stream.results[0].alternatives[0].transcript;
+            }
+        
+            if (stream.results[0].isFinal) {
+                process.stdout.write(`${stdoutText}\n`);
+                let transcript = stream.results[0].alternatives[0].transcript;
+                //send data to socket client
+                console.log(`${member.tag}: ${transcript}`);
+                io.emit('message', `${member.tag}: ${transcript}`);
+                radio.chatChannel.send(`${member.tag}: ${transcript}`);
+        
+                isFinalEndTime = 0;
+            }
+            else {
+                // Make sure transcript does not exceed console character length
+                if (stdoutText.length > process.stdout.columns) {
+                    stdoutText = stdoutText.substring(0, process.stdout.columns - 4) + '...';
+                }
+                // process.stdout.write(`${stdoutText}`);
+                
+                lastTranscriptWasFinal = false;
+            }
+        });
+        /*.on('data', response => {
             const transcription = response.results
                 .map(result => result.alternatives[0].transcript)
                 .join('\n')
                 .toLowerCase()
+            
             console.log(`${member.tag}: ${transcription}`);
             io.emit('message', `${member.tag}: ${transcription}`);
             radio.chatChannel.send(`${member.tag}: ${transcription}`);
-    });
+    });*/
 
     const convertTo1ChannelStream = new ConvertTo1ChannelStream();
     voiceStream.pipe(convertTo1ChannelStream).pipe(recognizeStream);
@@ -148,18 +187,23 @@ client.on('message', async (msg) => {
                                     console.log('Activated!');
                                     connection.play(new Silence(), { type: 'opus' });
                                     connection.on('speaking', (user, speaking) => {
-                                        if (user, speaking) {
-                                            console.log(user.tag + ' is speaking!');
-                                            const radio = {
-                                                name: voiceChannel.name,
-                                                output,
-                                                connection,
-                                                chatChannel,
-                                                members: new Map()
-                                            };
-                                            radios.set(voiceChannel.channelID, radio);
-                                            if (user.id != client.user.id) {
-                                                startRecording(user, radio);
+                                        if (user) {
+                                            if (speaking) {
+                                                console.log(user.tag + ' is speaking!');
+                                                const radio = {
+                                                    name: voiceChannel.name,
+                                                    output,
+                                                    connection,
+                                                    chatChannel,
+                                                    members: new Map()
+                                                };
+                                                radios.set(voiceChannel.channelID, radio);
+                                                if (user.id != client.user.id) {
+                                                    startRecording(user, radio);
+                                                }
+                                            }
+                                            else {
+                                                connection.play(new Silence(), { type: 'opus' });
                                             }
                                         }
                                     });
