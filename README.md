@@ -16,10 +16,11 @@ Discord’s overlay as the surface to display captions on.
 * Google Speech To Text
 
 # How to use:
-1. Join voice channel
-2. Type <prefix>activate <channel>
-3. Clients activate Electron
-4. Speak
+1. Turn bot services on
+2. Join voice channel
+3. Type ``<prefix>activate <channel>``
+4. Clients can use Electron
+5. Speak
 
 # How to configure:
 You need a config.json with the following:
