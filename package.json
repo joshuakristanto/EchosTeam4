@@ -22,8 +22,10 @@
     "chalk": "^3.0.0",
     "discord.js": "^11.5.1",
     "encoding": "^0.1.12",
+    "express": "^4.15.2",
     "node-record-lpcm16": "^1.0.1",
     "package.json": "^2.0.1",
+    "socket.io": "^2.3.0",
     "sox": "^0.1.0",
     "yargs": "^15.1.0"
   },

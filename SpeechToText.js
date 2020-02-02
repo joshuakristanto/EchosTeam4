@@ -101,6 +101,21 @@
  * Maximum streaming limit should be 1/2 of SpeechAPI Streaming Limit.
  */
 
+
+var app = require('express')();
+var http = require('http').createServer(app);
+var io = require('socket.io')(http);
+
+
+
+//   io.on('connection', function (socket) {
+//   console.log('a user connected');
+//   socket.on('disconnect', function (data) {
+      
+
+//   });
+// });
+
 function infiniteStream(
   encoding,
   sampleRateHertz,
@@ -188,6 +203,12 @@ function infiniteStream(
     if (stream.results[0].isFinal) {
       process.stdout.write(chalk.green(`${stdoutText}\n`));
 
+        console.log("stdoutText");
+        
+        io.emit('message', " " + stdoutText);
+        console.log("stdoutText");
+        
+        console.log("stdoutText");
       isFinalEndTime = resultEndTime;
       lastTranscriptWasFinal = true;
     } else {
@@ -339,3 +360,12 @@ require(`yargs`)
   .epilogue(`For more information, see https://cloud.google.com/speech/docs`)
   .help()
   .strict().argv;
+
+
+  
+
+
+
+http.listen(7110, function () {
+  console.log('listening on *:7110');
+});

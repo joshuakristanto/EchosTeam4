@@ -12,7 +12,7 @@ function createWindow () {
     width: 400,
     height: 400,
     transparent: true,
-    frame: false,
+    frame: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     }
@@ -20,11 +20,11 @@ function createWindow () {
   })
 
   // positioner.move('topRight');
-  mainWindow.setPosition(1030,-800,false);
+  // mainWindow.setPosition(1030,-800,false);
   mainWindow.setAlwaysOnTop(true, "floating");
 mainWindow.setVisibleOnAllWorkspaces(true);
 mainWindow.setFullScreenable(false);
-mainWindow.setIgnoreMouseEvents(true);
+// mainWindow.setIgnoreMouseEvents(true);
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')
 
