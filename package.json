@@ -23,7 +23,7 @@
     "discord.js": "12.0.0-dev",
     "express": "^4.15.2",
     "fs-extra": "^8.1.0",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.4.0"
   },
   "devDependencies": {},
   "description": ""
